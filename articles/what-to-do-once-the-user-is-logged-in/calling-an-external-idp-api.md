@@ -136,7 +136,11 @@ The `accessToken` we get here will have access to call all the APIs you've speci
 To deploy this webtask you will can use wt-cli specifying your own secrets
 
 ```bash
-wt create proxy.js --secret ACCOUNT_NAME=[your-account] --secret ID_TOKEN_CLIENT_SECRET=[app-secret] --secret CLIENT_ID=[non-interactive-client-id] --secret CLIENT_SECRET=[non-interactive-client-secret]
+wt create proxy.js \
+    --secret ACCOUNT_NAME=[your-account] \
+    --secret ID_TOKEN_CLIENT_SECRET=[app-secret] \
+    --secret CLIENT_ID=[non-interactive-client-id] \
+    --secret CLIENT_SECRET=[non-interactive-client-secret]
 ```
 
 > Once the webtask is created, you will be get a message with the webtask URL. Copy that url as you will use it in the next section.
