@@ -63,7 +63,7 @@ The endpoint will verify the token sent in the authorization header before doing
 
   > Note: `context.data.ID_TOKEN_CLIENT_SECRET` contains the client secret for the native/SPA app.
 
-Create an helper function to execute the client credentials exchange and get an access token to consume Auth0 Management API
+Create a helper function called `getAccessToken` to execute the client credentials flow and get an access token to consume Auth0 Management API
 
   ```js
   function getAccessToken(context, cb){
@@ -86,7 +86,7 @@ Create an helper function to execute the client credentials exchange and get an 
 
   > Note: `context.data.CLIENT_ID` and `context.data.CLIENT_SECRET` are the keys from the non interactive client.
 
-Create a helper function to call `/api/v2/users/{user-id}` endpoint from Auth0 Management API
+Create a helper function called `getUserProfile` to call the `/api/v2/users/{user-id}` endpoint from Auth0 Management API and get the user profile with the IdP access token.
 
   ```js
   function getUserProfile(context, userId, token, cb){
@@ -104,7 +104,7 @@ Create a helper function to call `/api/v2/users/{user-id}` endpoint from Auth0 M
   }
   ```
 
-Finally let's wrap al this together. After validating the id_token, call the `getAccessToken` to execute client credentials flow and then call the `getUserProfile` method with `decoded.sub` as user id to get the user profile with the access token.
+Finally let's put all this together in the endpoint logic. After verifying the id_token, call the `getAccessToken` to execute client credentials flow and then call the `getUserProfile` method with `decoded.sub` as user id to get the user profile with the access token.
 
   ```js
   app.get('/', function (req, res) {
@@ -130,15 +130,15 @@ Finally let's wrap al this together. After validating the id_token, call the `ge
   });
   ```
 
-  > Most of the times, there's going to be just one, but if you've used [account linking feature](/link-accounts) there might be more than one.
+  > Most of the times, there's going to be just one identity in the identities array, but if you've used [account linking feature](/link-accounts) there might be more than one.
 
 The `accessToken` we get here will have access to call all the APIs you've specified in Auth0 dashboard.
 
-To deploy this webtask you will use this command
+To deploy this webtask you will can use wt-cli specifying your own secrets
 
-  ```bash
-  wt create proxy.js --secret ACCOUNT_NAME=[your-account] --secret ID_TOKEN_CLIENT_SECRET=[app-secret] --secret CLIENT_ID=[non-interactive-client-id] --secret CLIENT_SECRET=[non-interactive-client-secret]
-  ```
+```bash
+wt create proxy.js --secret ACCOUNT_NAME=[your-account] --secret ID_TOKEN_CLIENT_SECRET=[app-secret] --secret CLIENT_ID=[non-interactive-client-id] --secret CLIENT_SECRET=[non-interactive-client-secret]
+```
 
 ## Call your API with your id_token
 
