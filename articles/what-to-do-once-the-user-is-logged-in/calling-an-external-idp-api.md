@@ -156,7 +156,7 @@ Now when you authenticate in your SPA/Native app you just need to use the token 
         xhr.setRequestHeader("Authorization", "Bearer " + token);
       }
     }).then(function(data, textStatus, jqXHR) {
-      alert("The request to the secured enpoint was successfull");
+      // Successfull call
     }, function(err) {
       alert("Error calling External IdP API");
     });
