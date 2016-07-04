@@ -16,7 +16,7 @@ The goal of this document is to show our recommended way to do it from a SPA/Nat
 
 ## Create a non interactive client to interact with Auth0 Management API
 
-To create a non interactive client you can check the document [How to create a non interactive client](/)
+To create a non interactive client you can check the document [API Authorization: Using the Management API](https://auth0.com/docs/api-auth/using-the-management-api)
 
 > Make sure that this client can be granted `read:user_idp_tokens` scope.
 
