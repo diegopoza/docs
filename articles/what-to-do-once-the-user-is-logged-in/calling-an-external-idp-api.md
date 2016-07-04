@@ -139,13 +139,26 @@ To deploy this webtask you will can use wt-cli specifying your own secrets
 wt create proxy.js --secret ACCOUNT_NAME=[your-account] --secret ID_TOKEN_CLIENT_SECRET=[app-secret] --secret CLIENT_ID=[non-interactive-client-id] --secret CLIENT_SECRET=[non-interactive-client-secret]
 ```
 
+> Once the webtask is created, you will be get a message with the webtask URL. Copy that url as you will use it in the next section.
+
 ## Call your API with your id_token
 
 Now when you authenticate in your SPA/Native app you just need to use the token to call the proxy backend.
 
   ```js
   lock.show(function(err, token, profile) {
-    // Function to call Google's API with the accessToken
-    getGoogleContactsWithToken(token);
+  
+    // Call your proxy API
+    $.ajax({
+      url: '[your webtask url]',
+      method: 'GET',
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+      }
+    }).then(function(data, textStatus, jqXHR) {
+      alert("The request to the secured enpoint was successfull");
+    }, function(err) {
+      alert("Error calling External IdP API");
+    });
   })
   ```
