@@ -4,23 +4,22 @@ When we authenticate using an external IdP (Facebook, Github, etc.), the IdP usu
 
 The goal of this document is to show our recommended way to do it from a SPA/Native application. The basic flow the following:
 
-1. Create a non interactive client with `read:user_idp_tokens` scope
-2. Create an application that will proxy the requests from the SPA/Native app to the IdP external API. This app will:  
-    1. Validate your id_token using the SPA/Native app client secret
-    2. Extract the `sub` from the id_token which contains the user_id
-    3. Execute the client credentials exchange to get a valid APIv2 access token (using the non interactive client)
-    4. Call the api/v2/users/{id} API and send the access_token in the header
-    5. Call the IdP external API using the IdP access token (`user.identities[0].access_token`)  
-3. From your SPA/native app call your API and send your id_token
+1. Create a client to interact with Auth0 Management API with `read:user_idp_tokens` scope granted
+2. Create a proxy api that will proxy the requests from your application to the IdP external API. This app will:  
+    1. Validate your the request from your application
+    2. Extract the user id from the request
+    3. Execute the client credentials exchange to get a valid APIv2 access token
+    4. Use the acecss token to execute the request to `/api/v2/users/{user_id}` API 
+    5. Use the IdP access token (`user.identities[0].access_token`) to call the IdP External API
+3. From your application, call your proxy api and send your id_token
 
+## Create a client to interact with Auth0 Management API
 
-## Create a non interactive client to interact with Auth0 Management API
-
-To create a non interactive client you can check the document [API Authorization: Using the Management API](https://auth0.com/docs/api-auth/using-the-management-api)
+To create a client to interact with Auth0 Management API you can check the document [API Authorization: Using the Management API](https://auth0.com/docs/api-auth/using-the-management-api)
 
 > Make sure that this client can be granted `read:user_idp_tokens` scope.
 
-## Create an application to proxy request from the application to the IdP API
+## Create a proxy API to proxy request from the application to the IdP API
 
 The application will use the id_token to verify the request and if it is a valid token, then it will request an access token to call Auth0 Management API (client credentials flow) and will use the `sub` claim from the id_token (which contains the user id) to call `/api/v2/users/{user-id}` and get the user's IdP access token. Then, with the access token you can call the IdP External API.
 
