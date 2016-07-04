@@ -1,31 +1,31 @@
 # Calling an external IdP (Facebook, Github, etc.) API.
 
-When we authenticate using an external IdP (Facebook, Github, etc.), the IdP usually provides an access token with the apropiate scope() in order to consume their API. To avoid leaking this access token to the browser we decided to removed it from the user profile. If you need to get the user's IDP access token, you will need to call `/api/v2/users/{user-id}` endpoint with `read:user_idp_tokens` scope.
+When we authenticate using an external IdP (Facebook, Github, etc.), the IdP usually provides an access token with the apropiate scope() in order to consume their API. To avoid leaking this access token to the browser we decided to removed it from the user profile. If you need to get the user's IDP access token, you will need to call the `/api/v2/users/{user-id}` endpoint with `read:user_idp_tokens` scope.
 
-The goal of this document is to show our recommended way to do it from a SPA/Native application. The basic flow the following:
+This document shows the recommended way to call an external IdP from a SPA/Native application. The basic flow the following:
 
-1. Create a client to interact with Auth0 Management API with `read:user_idp_tokens` scope granted
-2. Create a proxy api that will handle the request to the External IdP API. This api will:  
-    1. Validate your the request from your application
-    2. Extract the user id from the request
-    3. Execute the client credentials exchange to get a valid APIv2 access token
-    4. Use the acecss token to execute the request to `/api/v2/users/{user_id}` API 
-    5. Use the IdP access token (`user.identities[0].access_token`) to call the IdP External API
-3. From your application, call your proxy api and send your id_token
+1. Create a client to interact with the Auth0 Management API with the `read:user_idp_tokens` scope granted.
+2. Create a proxy API that will handle the request to the External IdP API. This API will:  
+    1. Validate your the request from your application.
+    2. Extract the user id from the request.
+    3. Execute the client credentials exchange to get a valid APIv2 access token.
+    4. Use the access token to execute the request to `/api/v2/users/{user_id}` API.
+    5. Use the IdP access token (`user.identities[0].access_token`) to call the IdP External API.
+3. From your application, call your proxy API and send your id_token.
 
-## Create a client to interact with Auth0 Management API
+## Create a client to interact with the Auth0 Management API
 
-To create a client to interact with Auth0 Management API you can check the document [API Authorization: Using the Management API](https://auth0.com/docs/api-auth/using-the-management-api)
+To create a client to interact with the Auth0 Management API you can check the document [API Authorization: Using the Management API](https://auth0.com/docs/api-auth/using-the-management-api).
 
-> Make sure that this client can be granted `read:user_idp_tokens` scope.
+> Make sure that this client can be granted the `read:user_idp_tokens` scope.
 
 ## Create a proxy API to handle requests to the External IdP API
 
-The application will use the id_token to verify the request and if it is a valid token, then it will request an access token to call Auth0 Management API (client credentials flow) and will use the `sub` claim from the id_token (which contains the user id) to call `/api/v2/users/{user-id}` and get the user's IdP access token. Then, with the access token you can call the IdP External API.
+The application will use `id_token` to verify the request and if it is a valid token, then it will request an access token to call the Auth0 Management API (client credentials flow) and will use the `sub` claim from id_token (which contains the user ID) to call `/api/v2/users/{user-id}` and get the user's IdP access token. Then, with the access token you can call the IdP External API.
 
-> We will show you who you can accomplish this by using Auth0 Webtasks.
+> We will show how to accomplish this by using Auth0 Webtasks.
 
-Create a new file called `proxy.js` that will be your webtask. It will be a simple expres app that exposes and endpoint.
+Create a new file called `proxy.js` that will be your webtask. It will be a simple express app that exposes an endpoint.
 
   ```js
   "use latest";
@@ -83,9 +83,9 @@ Create a helper function called `getAccessToken` to execute the client credentia
   }
   ```
 
-  > Note: `context.data.CLIENT_ID` and `context.data.CLIENT_SECRET` are the keys from the non interactive client.
+  > Note: `context.data.CLIENT_ID` and `context.data.CLIENT_SECRET` are the keys from the non-interactive client.
 
-Create a helper function called `getUserProfile` to call the `/api/v2/users/{user-id}` endpoint from Auth0 Management API and get the user profile with the IdP access token.
+Create a helper function called `getUserProfile` to call the `/api/v2/users/{user-id}` endpoint from the Auth0 Management API and get the user profile with the IdP access token.
 
   ```js
   function getUserProfile(context, userId, token, cb){
@@ -103,7 +103,7 @@ Create a helper function called `getUserProfile` to call the `/api/v2/users/{use
   }
   ```
 
-Finally let's put all this together in the endpoint logic. After verifying the id_token, call the `getAccessToken` to execute client credentials flow and then call the `getUserProfile` method with `decoded.sub` as user id to get the user profile with the access token.
+Finally let's put all this together in the endpoint logic. After verifying the id_token, call the `getAccessToken` method to execute the client credentials flow and then call the `getUserProfile` method with `decoded.sub` as user ID to get the user profile with the access token.
 
   ```js
   app.get('/', function (req, res) {
@@ -129,11 +129,11 @@ Finally let's put all this together in the endpoint logic. After verifying the i
   });
   ```
 
-  > Most of the times, there's going to be just one identity in the identities array, but if you've used [account linking feature](/link-accounts) there might be more than one.
+  > Most of the times, there's going to be just one identity in the identities array, but if you've used the [account linking feature](/link-accounts) there might be more than one.
 
-The `accessToken` we get here will have access to call all the APIs you've specified in Auth0 dashboard.
+The `accessToken` we get here will have access to call all the APIs you've specified in the Auth0 dashboard.
 
-To deploy this webtask you will can use wt-cli specifying your own secrets
+To deploy this webtask you can use `wt-cli` specifying your own secrets, like in the following example.
 
 ```bash
 wt create proxy.js \
@@ -143,11 +143,11 @@ wt create proxy.js \
     --secret CLIENT_SECRET=[non-interactive-client-secret]
 ```
 
-> Once the webtask is created, you will be get a message with the webtask URL. Copy that url as you will use it in the next section.
+> Once the webtask is created, you will be get a message with the webtask URL. Copy that URL as you will use it in the next section.
 
 ## Call your API with your id_token
 
-Now when you authenticate in your SPA/Native app you just need to use the token to call the proxy backend.
+Now when you authenticate in your SPA/Native app you just need to use the token to call the proxy backend, as shown in the following code.
 
   ```js
   lock.show(function(err, token, profile) {
