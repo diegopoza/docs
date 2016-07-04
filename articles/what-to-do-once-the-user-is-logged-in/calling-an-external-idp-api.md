@@ -5,7 +5,7 @@ When we authenticate using an external IdP (Facebook, Github, etc.), the IdP usu
 The goal of this document is to show our recommended way to do it from a SPA/Native application. The basic flow the following:
 
 1. Create a client to interact with Auth0 Management API with `read:user_idp_tokens` scope granted
-2. Create a proxy api that will proxy the requests from your application to the IdP external API. This app will:  
+2. Create a proxy api that will handle the request to the External IdP API. This api will:  
     1. Validate your the request from your application
     2. Extract the user id from the request
     3. Execute the client credentials exchange to get a valid APIv2 access token
@@ -19,7 +19,7 @@ To create a client to interact with Auth0 Management API you can check the docum
 
 > Make sure that this client can be granted `read:user_idp_tokens` scope.
 
-## Create a proxy API to proxy request from the application to the IdP API
+## Create a proxy API to handle requests to the External IdP API
 
 The application will use the id_token to verify the request and if it is a valid token, then it will request an access token to call Auth0 Management API (client credentials flow) and will use the `sub` claim from the id_token (which contains the user id) to call `/api/v2/users/{user-id}` and get the user's IdP access token. Then, with the access token you can call the IdP External API.
 
